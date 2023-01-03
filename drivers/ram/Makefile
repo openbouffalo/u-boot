@@ -19,6 +19,7 @@ obj-$(CONFIG_K3_DDRSS) += k3-ddrss/
 
 obj-$(CONFIG_IMXRT_SDRAM) += imxrt_sdram.o
 
+obj-$(CONFIG_RAM_BFLB) += bflb/
 obj-$(CONFIG_RAM_SIFIVE) += sifive/
 
 obj-$(CONFIG_ARCH_OCTEON) += octeon/
