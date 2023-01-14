@@ -22,6 +22,16 @@ config K3_SYSTEM_CONTROLLER
 	help
 	  Say 'y' here to add support for TI' K3 System Controller.
 
+config REMOTEPROC_BFLB
+	bool "Support for Bouffalo Lab BL808 remoteproc support"
+	select REMOTEPROC
+	depends on DM
+	depends on TARGET_BFLB_BL808
+	depends on OF_CONTROL
+	help
+	  Say 'y' here to add support for the booting the processors
+	  in the Bouffalo Lab BL808 SoC.
+
 config REMOTEPROC_SANDBOX
 	bool "Support for Test processor for Sandbox"
 	select REMOTEPROC
