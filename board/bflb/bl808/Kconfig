@@ -1,0 +1,39 @@
+if TARGET_BFLB_BL808
+
+config BL808_CPU_D0
+	def_bool ARCH_RV64I
+	select THEAD_C906
+
+config BL808_CPU_M0
+	def_bool ARCH_RV32I
+	select THEAD_E906
+
+config BOARD_SPECIFIC_OPTIONS # dummy
+	def_bool y
+	select BOARD_EARLY_INIT_F
+	select DM_GPIO if GPIO
+	select GENERIC_RISCV
+	select OF_HAS_PRIOR_STAGE if RISCV_SMODE
+	imply RISCV_TIMER
+
+config SYS_BOARD
+	default "bl808"
+
+config SYS_CONFIG_NAME
+	default "bl808"
+
+config SYS_CPU
+	default "thead"
+
+config SYS_LOAD_ADDR
+	default 0x50100000
+
+config SYS_VENDOR
+	default "bflb"
+
+config TEXT_BASE
+	default 0x58000000 if XIP
+	default 0x50100000 if BL808_CPU_D0
+	default 0x22020000 if BL808_CPU_M0
+
+endif
