@@ -1,0 +1,50 @@
+// SPDX-License-Identifier: GPL-2.0+
+
+#define SOC_PERIPHERAL_IRQ(n) (16 + (n))
+
+#include "bl808.dtsi"
+
+/ {
+	cpus {
+		timebase-frequency = <1000000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		cpu0: cpu@0 {
+			compatible = "thead,e907", "riscv";
+			device_type = "cpu";
+			reg = <0>;
+			d-cache-block-size = <32>;
+			d-cache-sets = <256>;
+			d-cache-size = <16384>;
+			i-cache-block-size = <32>;
+			i-cache-sets = <512>;
+			i-cache-size = <32768>;
+			riscv,isa = "rv32imafdc";
+		};
+	};
+
+	clint: timer@e0000000 {
+		compatible = "thead,e907-clint",
+			     "sifive,clint0";
+		reg = <0xe0000000 0x10000>;
+		interrupts-extended = <&clic 3 IRQ_TYPE_EDGE_RISING>,
+				      <&clic 7 IRQ_TYPE_EDGE_RISING>;
+	};
+
+	clic: interrupt-controller@e0800000 {
+		compatible = "thead,e907-clic";
+		reg = <0xe0800000 0x5000>;
+		interrupt-controller;
+		#address-cells = <0>;
+		#interrupt-cells = <2>;
+	};
+};
+
+&mcu_peri {
+	interrupt-parent = <&clic>;
+};
+
+&mm_peri {
+	interrupt-parent = <&mm_misc>;
+};
