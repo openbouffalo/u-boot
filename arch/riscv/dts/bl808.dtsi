@@ -1,0 +1,564 @@
+// SPDX-License-Identifier: GPL-2.0+
+
+#include <dt-bindings/clock/bl808-glb.h>
+#include <dt-bindings/clock/bl808-hbn.h>
+#include <dt-bindings/clock/bl808-mm-glb.h>
+#include <dt-bindings/clock/bl808-pds.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/reset/bl808-mm-glb.h>
+
+/dts-v1/;
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	ext_xtal: clk-ext-xtal {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+	};
+
+	mcu_peri: bus@20000000 {
+		compatible = "simple-bus";
+		ranges;
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		glb: syscon@20000000 {
+			compatible = "bflb,bl808-glb", "simple-mfd";
+			reg = <0x20000000 0x1000>;
+			ranges;
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			mcu_irq: interrupt-controller@20000050 {
+				compatible = "bflb,bl808-mcu-irq";
+				reg = <0x20000050 0x18>;
+				interrupt-controller;
+				#interrupt-cells = <1>;
+				status = "disabled";
+			};
+
+			glb_clk: clock-controller@20000000 {
+				compatible = "bflb,bl808-glb-clk";
+				reg = <0x20000000 0x1000>;
+				clocks = <&hbn_clk CLK_XCLK>,
+					 <&hbn_clk CLK_HBN_ROOT>,
+					 <&hbn_clk CLK_HBN_UART>;
+				clock-names = "xclk",
+					      "hbn_root",
+					      "hbn_uart";
+				#clock-cells = <1>;
+				#reset-cells = <1>;
+			};
+
+			sysreset: sysreset@20000000 {
+				compatible = "bflb,bl808-glb-sysreset";
+				reg = <0x20000000 0x1000>;
+			};
+
+			gauge: adc@200008a4 {
+				compatible = "bflb,bl808-gauge";
+				reg = <0x200008a4 0x20>;
+				interrupts = <MCU_IRQ(8, IRQ_TYPE_LEVEL_HIGH)>;
+			};
+
+			gpio: gpio@20000000 {
+				compatible = "bflb,bl808-gpio";
+				reg = <0x20000000 0x1000>;
+				interrupts = <MCU_IRQ(31, IRQ_TYPE_LEVEL_HIGH)>,
+					     <MCU_IRQ(44, IRQ_TYPE_LEVEL_HIGH)>;
+				interrupt-names = "dma", "irq";
+				gpio-controller;
+				interrupt-controller;
+				#gpio-cells = <2>;
+				#interrupt-cells = <2>;
+
+				emac_pins: emac-pins {
+					pins = "GPIO24", "GPIO25", "GPIO26",
+					       "GPIO27", "GPIO28", "GPIO29",
+					       "GPIO30", "GPIO31", "GPIO32",
+					       "GPIO33";
+					function = "emac";
+				};
+
+				sdh_pins: sdh-pins {
+					pins = "GPIO0", "GPIO1", "GPIO2",
+					       "GPIO3", "GPIO4", "GPIO5";
+					function = "sdh";
+					bias-pull-up;
+				};
+			};
+		};
+
+		gpip: gpip@20002000 {
+			compatible = "bflb,bl808-gpip";
+			reg = <0x20002000 0x400>;
+			interrupts = <MCU_IRQ(25, IRQ_TYPE_LEVEL_HIGH)>;
+			interrupt-names = "adc";
+			#io-channel-cells = <1>;
+		};
+
+		sec_eng: crypto@20004000 {
+			compatible = "bflb,bl808-security-engine";
+			reg = <0x20004000 0x1000>;
+			interrupts = <MCU_IRQ(9, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MCU_IRQ(10, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MCU_IRQ(11, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MCU_IRQ(12, IRQ_TYPE_LEVEL_HIGH)>;
+			interrupt-names = "id1", "id0", "id1_cdet", "id0_cdet";
+		};
+
+		cci: clock-controller@20008000 {
+			compatible = "bflb,bl808-cci";
+			reg = <0x20008000 0x1000>;
+			clocks = <&pds_clk CLK_RC32M>,
+				 <&hbn_clk CLK_XTAL>;
+			clock-names = "rc32m",
+				      "xtal";
+			#clock-cells = <1>;
+		};
+
+		mcu_misc: syscon@20009000 {
+			compatible = "bflb,bl808-mcu-misc";
+			reg = <0x20009000 0x1000>;
+		};
+
+		uart0: serial@2000a000 {
+			compatible = "bflb,bl808-uart";
+			reg = <0x2000a000 0x100>;
+			interrupts = <MCU_IRQ(28, IRQ_TYPE_LEVEL_HIGH)>;
+			clocks = <&glb_clk CLK_UART>;
+			status = "disabled";
+		};
+
+		uart1: serial@2000a100 {
+			compatible = "bflb,bl808-uart";
+			reg = <0x2000a100 0x100>;
+			interrupts = <MCU_IRQ(29, IRQ_TYPE_LEVEL_HIGH)>;
+			clocks = <&glb_clk CLK_UART>;
+			status = "disabled";
+		};
+
+		spi0: spi@2000a200 {
+			compatible = "bflb,bl808-spi";
+			reg = <0x2000a200 0x100>;
+			interrupts = <MCU_IRQ(27, IRQ_TYPE_LEVEL_HIGH)>;
+			status = "disabled";
+		};
+
+		i2c0: i2c@2000a300 {
+			compatible = "bflb,bl808-i2c";
+			reg = <0x2000a300 0x100>;
+			interrupts = <MCU_IRQ(32, IRQ_TYPE_LEVEL_HIGH)>;
+			status = "disabled";
+		};
+
+		pwm: pwm@2000a400 {
+			compatible = "bflb,bl808-pwm";
+			reg = <0x2000a400 0x100>;
+			interrupts = <MCU_IRQ(33, IRQ_TYPE_LEVEL_HIGH)>;
+			status = "disabled";
+		};
+
+		timer0: timer@2000a500 {
+			compatible = "bflb,bl808-timer";
+			reg = <0x2000a500 0x100>;
+			interrupts = <MCU_IRQ(36, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MCU_IRQ(37, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MCU_IRQ(38, IRQ_TYPE_LEVEL_HIGH)>;
+			interrupt-names = "ch0", "ch1", "wdt";
+		};
+
+		ir: ir@2000a600 {
+			compatible = "bflb,bl808-ir";
+			reg = <0x2000a600 0x100>;
+			interrupts = <MCU_IRQ(19, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MCU_IRQ(20, IRQ_TYPE_LEVEL_HIGH)>;
+			interrupt-names = "tx", "rx";
+			status = "disabled";
+		};
+
+		cks: accelerator@2000a700 {
+			compatible = "bflb,bl808-cks";
+			reg = <0x2000a700 0x100>;
+		};
+
+		ipc0: mailbox@2000a800 {
+			compatible = "bflb,bl808-ipc";
+			reg = <0x2000a800 0x40>;
+			interrupts = <MCU_IRQ(2, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MCU_IRQ(3, IRQ_TYPE_LEVEL_HIGH)>;
+			interrupt-names = "cpu1", "cpu0";
+		};
+
+		ipc1: mailbox@2000a840 {
+			compatible = "bflb,bl808-ipc";
+			reg = <0x2000a840 0x40>;
+			interrupts = <MCU_IRQ(34, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MCU_IRQ(35, IRQ_TYPE_LEVEL_HIGH)>;
+			interrupt-names = "cpu1", "cpu0";
+		};
+
+		i2c1: i2c@2000a900 {
+			compatible = "bflb,bl808-i2c";
+			reg = <0x2000a900 0x100>;
+			interrupts = <MCU_IRQ(39, IRQ_TYPE_LEVEL_HIGH)>;
+			status = "disabled";
+		};
+
+		uart2: serial@2000aa00 {
+			compatible = "bflb,bl808-uart";
+			reg = <0x2000aa00 0x100>;
+			interrupts = <MCU_IRQ(30, IRQ_TYPE_LEVEL_HIGH)>;
+			clocks = <&glb_clk CLK_UART>;
+			status = "disabled";
+		};
+
+		i2s: i2s@2000ab00 {
+			compatible = "bflb,bl808-i2s";
+			reg = <0x2000ab00 0x100>;
+			interrupts = <MCU_IRQ(40, IRQ_TYPE_LEVEL_HIGH)>;
+			status = "disabled";
+		};
+
+		pdm0: pdm@2000ac00 {
+			compatible = "bflb,bl808-pdm";
+			reg = <0x2000ac00 0x100>;
+			interrupts = <MCU_IRQ(22, IRQ_TYPE_LEVEL_HIGH)>;
+			status = "disabled";
+		};
+
+		lz4d: accelerator@2000ad00 {
+			compatible = "bflb,bl808-lz4d";
+			reg = <0x2000ad00 0x100>;
+			interrupts = <MCU_IRQ(7, IRQ_TYPE_LEVEL_HIGH)>;
+		};
+
+		sflash: spi@2000b000 {
+			compatible = "bflb,bl808-sflash";
+			reg = <0x2000b000 0x1000>;
+			interrupts = <MCU_IRQ(13, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MCU_IRQ(14, IRQ_TYPE_LEVEL_HIGH)>;
+			interrupt-names = "id1", "id0";
+		};
+
+		dma0: dma@2000c000 {
+			compatible = "bflb,bl808-dma";
+			reg = <0x2000c000 0x1000>;
+			interrupts = <MCU_IRQ(15, IRQ_TYPE_LEVEL_HIGH)>;
+			interrupt-names = "all";
+		};
+
+		pds: syscon@2000e000 {
+			compatible = "bflb,bl808-pds", "simple-mfd";
+			reg = <0x2000e000 0x1000>;
+			ranges;
+			interrupts = <MCU_IRQ(50, IRQ_TYPE_LEVEL_HIGH)>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			pds_clk: clock-controller@2000e000 {
+				compatible = "bflb,bl808-pds-clk";
+				reg = <0x2000e000 0x1000>;
+				clocks = <&glb_clk CLK_TOP_AUPLL_DIV1>,
+					 <&glb_clk CLK_TOP_CPUPLL_400M>,
+					 <&glb_clk CLK_TOP_WIFIPLL_240M>,
+					 <&glb_clk CLK_TOP_WIFIPLL_320M>;
+				clock-names = "aupll_div1",
+					      "cpupll_400m",
+					      "wifipll_240m",
+					      "wifipll_320m";
+				#clock-cells = <1>;
+				#reset-cells = <1>;
+			};
+
+			usb_phy: phy@2000e500 {
+				compatible = "bflb,bl808-usb-phy";
+				reg = <0x2000e500 0x8>;
+				#phy-cells = <0>;
+			};
+		};
+
+		hbn: syscon@2000f000 {
+			compatible = "bflb,bl808-hbn", "simple-mfd";
+			reg = <0x2000f000 0x1000>;
+			ranges;
+			interrupts = <MCU_IRQ(51, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MCU_IRQ(52, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MCU_IRQ(53, IRQ_TYPE_LEVEL_HIGH)>;
+			interrupt-names = "out0", "out1", "bor";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			hbn_clk: clock-controller@2000f000 {
+				compatible = "bflb,bl808-hbn-clk";
+				reg = <0x2000f000 0x1000>;
+				clocks = <&pds_clk CLK_RC32M>,
+					 <&pds_clk CLK_PDS_PLL>,
+					 <&glb_clk CLK_BCLK>,
+					 <&glb_clk CLK_DIG_32K>,
+					 <&glb_clk CLK_TOP_MUXPLL_160M>,
+					 <&ext_xtal>;
+				clock-names = "rc32m",
+					      "pds_pll",
+					      "bclk",
+					      "dig_32k",
+					      "muxpll_160m",
+					      "ext_xtal";
+				#clock-cells = <1>;
+			};
+		};
+
+		audio: audio@20055000 {
+			compatible = "bflb,bl808-audio";
+			reg = <0x20055000 0x1000>;
+			interrupts = <MCU_IRQ(4, IRQ_TYPE_LEVEL_HIGH)>;
+			status = "disabled";
+		};
+
+		efuse: efuse@20056000 {
+			compatible = "bflb,bl808-efuse";
+			reg = <0x20056000 0x1000>;
+			interrupts = <MCU_IRQ(26, IRQ_TYPE_LEVEL_HIGH)>;
+		};
+
+		sdh: mmc@20060000 {
+			compatible = "bflb,bl808-sdhci";
+			reg = <0x20060000 0x1000>;
+			interrupts = <MCU_IRQ(17, IRQ_TYPE_LEVEL_HIGH)>;
+			clocks = <&glb_clk CLK_BUS_SDH>,
+				 <&glb_clk CLK_SDH>;
+			clock-names = "bus", "mod";
+			pinctrl-0 = <&sdh_pins>;
+			pinctrl-names = "default";
+			status = "disabled";
+		};
+
+		emac: emac@20070000 {
+			compatible = "bflb,bl808-emac";
+			reg = <0x20070000 0x1000>;
+			interrupts = <MCU_IRQ(24, IRQ_TYPE_LEVEL_HIGH)>;
+			clocks = <&glb_clk CLK_BUS_EMAC>;
+			clock-names = "bus";
+			pinctrl-0 = <&emac_pins>;
+			pinctrl-names = "default";
+			status = "disabled";
+		};
+
+		dma1: dma@20071000 {
+			compatible = "bflb,bl808-dma";
+			reg = <0x20071000 0x1000>;
+			interrupts = <MCU_IRQ(16, IRQ_TYPE_LEVEL_HIGH)>;
+			interrupt-names = "all";
+		};
+
+		usb: usb@20072000 {
+			compatible = "bflb,bl808-usb";
+			reg = <0x20072000 0x1000>;
+			interrupts = <MCU_IRQ(21, IRQ_TYPE_LEVEL_HIGH)>;
+			clocks = <&glb_clk CLK_BUS_USB>, <&glb_clk CLK_USBPLL>;
+			clock-names = "bus", "mod";
+			phys = <&usb_phy>;
+			phy-names = "phy";
+			status = "disabled";
+		};
+	};
+
+	mm_peri: bus@30000000 {
+		compatible = "simple-bus";
+		ranges;
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		mm_misc: syscon@30000000 {
+			compatible = "bflb,bl808-mm-misc", "simple-mfd";
+			reg = <0x30000000 0x1000>;
+			ranges;
+			resets = <&mm_glb RST_MM_MISC>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			mm_cpu: cpu {
+				compatible = "bflb,bl808-mm-cpu";
+				clocks = <&mm_glb CLK_MM_CPU>;
+				resets = <&mm_glb RST_MM_CPU>;
+			};
+
+			mm_irq: interrupt-controller@300000a0 {
+				compatible = "bflb,bl808-mm-irq";
+				reg = <0x300000a0 0x18>;
+				interrupt-controller;
+				#interrupt-cells = <1>;
+				status = "disabled";
+			};
+		};
+
+		dma2: dma@30001000 {
+			compatible = "bflb,bl808-dma";
+			reg = <0x30001000 0x1000>;
+			interrupts = <MM_IRQ(24, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MM_IRQ(25, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MM_IRQ(26, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MM_IRQ(27, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MM_IRQ(28, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MM_IRQ(29, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MM_IRQ(30, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MM_IRQ(31, IRQ_TYPE_LEVEL_HIGH)>;
+			resets = <&mm_glb RST_MM_DMA>;
+		};
+
+		uart3: serial@30002000 {
+			compatible = "bflb,bl808-uart";
+			reg = <0x30002000 0x100>;
+			interrupts = <MM_IRQ(4, IRQ_TYPE_LEVEL_HIGH)>;
+			clocks = <&mm_glb CLK_MM_UART0>;
+			resets = <&mm_glb RST_MM_UART0>;
+			status = "disabled";
+		};
+
+		i2c2: i2c@30003000 {
+			compatible = "bflb,bl808-i2c";
+			reg = <0x30003000 0x100>;
+			interrupts = <MM_IRQ(5, IRQ_TYPE_LEVEL_HIGH)>;
+			clocks = <&mm_glb CLK_MM_I2C0>;
+			resets = <&mm_glb RST_MM_I2C0>;
+			status = "disabled";
+		};
+
+		i2c3: i2c@30004000 {
+			compatible = "bflb,bl808-i2c";
+			reg = <0x30004000 0x100>;
+			interrupts = <MM_IRQ(6, IRQ_TYPE_LEVEL_HIGH)>;
+			clocks = <&mm_glb CLK_MM_I2C1>;
+			resets = <&mm_glb RST_MM_I2C1>;
+			status = "disabled";
+		};
+
+		ipc2: mailbox@30005000 {
+			compatible = "bflb,bl808-ipc";
+			reg = <0x30005000 0x40>;
+			interrupts = <MM_IRQ(2, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MM_IRQ(38, IRQ_TYPE_LEVEL_HIGH)>;
+			interrupt-names = "cpu1", "cpu0";
+			resets = <&mm_glb RST_MM_IPC>;
+		};
+
+		dma2d: dma@30006000 {
+			compatible = "bflb,bl808-dma2d";
+			reg = <0x30006000 0x1000>;
+			resets = <&mm_glb RST_MM_DMA2D>;
+			interrupts = <MM_IRQ(45, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MM_IRQ(46, IRQ_TYPE_LEVEL_HIGH)>;
+		};
+
+		mm_glb: clock-controller@30007000 {
+			compatible = "bflb,bl808-mm-glb";
+			reg = <0x30007000 0x1000>;
+			clocks = <&pds_clk CLK_RC32M>,
+				 <&hbn_clk CLK_XTAL>,
+				 <&glb_clk CLK_TOP_CPUPLL_400M>,
+				 <&glb_clk CLK_DSPPLL>,
+				 <&glb_clk CLK_MM_MUXPLL_160M>,
+				 <&glb_clk CLK_MM_MUXPLL_240M>,
+				 <&glb_clk CLK_MM_MUXPLL_320M>;
+			clock-names = "rc32m",
+				      "xtal",
+				      "cpupll_400m",
+				      "dsppll",
+				      "muxpll_160m",
+				      "muxpll_240m",
+				      "muxpll_320m";
+			#clock-cells = <1>;
+			#reset-cells = <1>;
+		};
+
+		spi1: spi@30008000 {
+			compatible = "bflb,bl808-spi";
+			reg = <0x30008000 0x100>;
+			interrupts = <MM_IRQ(7, IRQ_TYPE_LEVEL_HIGH)>;
+			clocks = <&mm_glb CLK_MM_SPI>;
+			resets = <&mm_glb RST_MM_SPI>;
+			status = "disabled";
+		};
+
+		timer1: timer@30009000 {
+			compatible = "bflb,bl808-timer";
+			reg = <0x30009000 0x100>;
+			interrupts = <MM_IRQ(61, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MM_IRQ(62, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MM_IRQ(63, IRQ_TYPE_LEVEL_HIGH)>;
+			interrupt-names = "ch0", "ch1", "wdt";
+			resets = <&mm_glb RST_MM_TIMER>;
+		};
+
+		psram_uhs: memory-controller@3000f000 {
+			compatible = "bflb,bl808-psram-uhs";
+			reg = <0x3000f000 0x1000>;
+			resets = <&mm_glb RST_MM_PSRAM_UHS>;
+		};
+
+		csi: csi@3001a000 {
+			compatible = "bflb,bl808-mipi-csi";
+			reg = <0x3001a000 0x100>;
+			interrupts = <MM_IRQ(37, IRQ_TYPE_LEVEL_HIGH)>;
+			status = "disabled";
+		};
+
+		dsi: dsi@3001a100 {
+			compatible = "bflb,bl808-mipi-dsi";
+			reg = <0x3001a100 0x100>;
+			interrupts = <MM_IRQ(59, IRQ_TYPE_LEVEL_HIGH)>;
+			status = "disabled";
+		};
+
+		dbi: dbi@3001b000 {
+			compatible = "bflb,bl808-mipi-dbi";
+			reg = <0x3001b000 0x100>;
+			interrupts = <MM_IRQ(53, IRQ_TYPE_LEVEL_HIGH)>;
+			status = "disabled";
+		};
+
+		codec_misc: syscon@30020000 {
+			compatible = "bflb,bl808-codec-misc";
+			reg = <0x30020000 0x1000>;
+			resets = <&mm_glb RST_MM_CODEC_MISC>;
+		};
+
+		mjpeg_enc: video-codec@30021000 {
+			compatible = "bflb,bl808-mjpeg-enc";
+			reg = <0x30021000 0x1000>;
+			interrupts = <MM_IRQ(20, IRQ_TYPE_LEVEL_HIGH)>;
+			resets = <&mm_glb RST_MM_MJPEG_ENC>;
+		};
+
+		h264_enc: video-codec@30022000 {
+			compatible = "bflb,bl808-h264-enc";
+			reg = <0x30022000 0x1000>;
+			interrupts = <MM_IRQ(17, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MM_IRQ(18, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MM_IRQ(19, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MM_IRQ(21, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MM_IRQ(22, IRQ_TYPE_LEVEL_HIGH)>,
+				     <MM_IRQ(23, IRQ_TYPE_LEVEL_HIGH)>;
+			interrupt-names = "bs", "frame", "seq",
+					  "s_bs", "s_frame", "s_seq";
+			clocks = <&mm_glb CLK_MM_H264>;
+			resets = <&mm_glb RST_MM_H264>;
+		};
+
+		mjpeg_dec: video-codec@30023000 {
+			compatible = "bflb,bl808-mjpeg-dec";
+			reg = <0x30023000 0x1000>;
+			interrupts = <MM_IRQ(40, IRQ_TYPE_LEVEL_HIGH)>;
+			resets = <&mm_glb RST_MM_MJPEG_DEC>;
+		};
+
+		cnn: accelerator@30024000 {
+			compatible = "bflb,bl808-cnn";
+			reg = <0x30024000 0x1000>;
+			clocks = <&mm_glb CLK_MM_CNN>;
+			resets = <&mm_glb RST_MM_CNN>;
+		};
+	};
+};

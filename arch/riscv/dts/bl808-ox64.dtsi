@@ -1,0 +1,47 @@
+// SPDX-License-Identifier: GPL-2.0+
+
+&ext_xtal {
+	clock-frequency = <40000000>;
+};
+
+&gpio {
+	uart0_pins: uart0-pins {
+		pins = "GPIO14", "GPIO15";
+		function = "uart";
+	};
+
+	uart3_pins: uart3-pins {
+		pins = "GPIO16", "GPIO17";
+		function = "mm_uart";
+	};
+};
+
+&sdh {
+	status = "okay";
+};
+
+&sflash {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+
+	flash@0 {
+		compatible = "jedec,spi-nor";
+		reg = <0>;
+	};
+};
+
+&uart0 {
+	pinctrl-0 = <&uart0_pins>;
+	pinctrl-names = "default";
+};
+
+&uart3 {
+	pinctrl-0 = <&uart3_pins>;
+	pinctrl-names = "default";
+};
+
+&usb {
+	dr_mode = "peripheral";
+	status = "okay";
+};

@@ -1,0 +1,77 @@
+// SPDX-License-Identifier: GPL-2.0+
+
+#define MCU_IRQ(n, f) (n)
+#define MM_IRQ(n, f) (16 + (n)) f
+
+#include "bl808.dtsi"
+
+/ {
+	cpus {
+		timebase-frequency = <1000000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		cpu0: cpu@0 {
+			compatible = "thead,c906", "riscv";
+			device_type = "cpu";
+			reg = <0>;
+			d-cache-block-size = <64>;
+			d-cache-sets = <256>;
+			d-cache-size = <32768>;
+			i-cache-block-size = <64>;
+			i-cache-sets = <128>;
+			i-cache-size = <32768>;
+			mmu-type = "riscv,sv39";
+			riscv,isa = "rv64imafdc";
+
+			cpu0_intc: interrupt-controller {
+				compatible = "riscv,cpu-intc";
+				interrupt-controller;
+				#address-cells = <0>;
+				#interrupt-cells = <1>;
+			};
+		};
+	};
+
+	plic: interrupt-controller@e0000000 {
+		compatible = "thead,c900-plic";
+		reg = <0xe0000000 0x4000000>;
+		interrupts-extended = <&cpu0_intc 11>,
+				      <&cpu0_intc 9>;
+		interrupt-controller;
+		riscv,ndev = <82>;
+		#address-cells = <0>;
+		#interrupt-cells = <2>;
+	};
+
+	clint: timer@e4000000 {
+		compatible = "thead,c900-clint";
+		reg = <0xe4000000 0xc000>;
+		interrupts-extended = <&cpu0_intc 3>,
+				      <&cpu0_intc 7>;
+	};
+};
+
+&audio {
+	interrupt-parent = <&plic>;
+	interrupts = <MM_IRQ(64, IRQ_TYPE_LEVEL_HIGH)>;
+};
+
+&mcu_irq {
+	interrupt-parent = <&plic>;
+	interrupts = <MM_IRQ(65, IRQ_TYPE_LEVEL_HIGH)>;
+	status = "okay";
+};
+
+&mcu_peri {
+	interrupt-parent = <&mcu_irq>;
+};
+
+&mm_peri {
+	interrupt-parent = <&plic>;
+};
+
+&pds {
+	interrupt-parent = <&plic>;
+	interrupts = <MM_IRQ(66, IRQ_TYPE_LEVEL_HIGH)>;
+};

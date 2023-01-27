@@ -1,0 +1,23 @@
+// SPDX-License-Identifier: GPL-2.0+
+
+/dts-v1/;
+
+#include "bl808-m0.dtsi"
+#include "bl808-ox64.dtsi"
+
+/ {
+	compatible = "pine64,ox64", "bflb,bl808";
+	model = "Pine64 Ox64 (M0)";
+
+	aliases {
+		serial0 = &uart0;
+	};
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+	};
+};
+
+&uart0 {
+	status = "okay";
+};
