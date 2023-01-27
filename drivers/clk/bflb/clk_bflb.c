@@ -342,7 +342,20 @@ static int bflb_clk_of_to_plat(struct udevice *dev)
 	return 0;
 }
 
+extern const struct bflb_clk_desc bl808_glb_clk_desc;
+extern const struct bflb_clk_desc bl808_hbn_clk_desc;
+extern const struct bflb_clk_desc bl808_mm_glb_clk_desc;
+extern const struct bflb_clk_desc bl808_pds_clk_desc;
+
 static const struct udevice_id bflb_clk_ids[] = {
+	{ .compatible = "bflb,bl808-glb-clk",
+	  .data = (ulong)&bl808_glb_clk_desc },
+	{ .compatible = "bflb,bl808-hbn-clk",
+	  .data = (ulong)&bl808_hbn_clk_desc },
+	{ .compatible = "bflb,bl808-mm-glb-clk",
+	  .data = (ulong)&bl808_mm_glb_clk_desc },
+	{ .compatible = "bflb,bl808-pds-clk",
+	  .data = (ulong)&bl808_pds_clk_desc },
 	{ }
 };
 
