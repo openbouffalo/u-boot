@@ -1,0 +1,35 @@
+// SPDX-License-Identifier: GPL-2.0+
+
+/dts-v1/;
+
+#include "bl808-m0.dtsi"
+
+/ {
+	compatible = "pine64,ox64", "bflb,bl808";
+	model = "Pine64 Ox64 (M0)";
+
+	aliases {
+		serial0 = &uart0;
+	};
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+	};
+};
+
+&ext_xtal {
+	clock-frequency = <40000000>;
+};
+
+&gpio {
+	uart0_pins: uart0-pins {
+		pins = "GPIO14", "GPIO15";
+		function = "uart";
+	};
+};
+
+&uart0 {
+	pinctrl-0 = <&uart0_pins>;
+	pinctrl-names = "default";
+	status = "okay";
+};

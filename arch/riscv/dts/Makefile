@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: GPL-2.0+
 
 dtb-$(CONFIG_TARGET_AE350) += ae350_32.dtb ae350_64.dtb
+dtb-$(CONFIG_TARGET_BFLB_BL808) += bl808-d0-ox64.dtb
+dtb-$(CONFIG_TARGET_BFLB_BL808) += bl808-m0-ox64.dtb
 dtb-$(CONFIG_TARGET_MICROCHIP_ICICLE) += microchip-mpfs-icicle-kit.dtb
 dtb-$(CONFIG_TARGET_QEMU_VIRT) += qemu-virt32.dtb qemu-virt64.dtb
 dtb-$(CONFIG_TARGET_OPENPITON_RISCV64) += openpiton-riscv64.dtb
