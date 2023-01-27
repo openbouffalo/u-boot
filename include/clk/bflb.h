@@ -22,10 +22,17 @@ struct bflb_clk_data {
 	u16 		fixed_div;
 };
 
+struct bflb_reset_data {
+	u16		reg;
+	u8		bit;
+};
+
 struct bflb_clk_desc {
 	const struct bflb_clk_data	*clks;
+	const struct bflb_reset_data	*resets;
 	const char *const		*fw_parents;
 	u8				num_clks;
+	u8				num_resets;
 	u8				num_fw_parents;
 };
 

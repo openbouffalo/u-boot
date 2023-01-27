@@ -7,6 +7,8 @@
 #include <dm/device-internal.h>
 #include <dm/lists.h>
 
+extern U_BOOT_DRIVER(bflb_reset);
+
 static struct clk *
 bflb_clk_get_current_parent(const struct clk *clk)
 {
@@ -277,6 +279,16 @@ static struct clk_ops bflb_clk_ops = {
 	.disable	= bflb_clk_disable,
 };
 
+static int bflb_clk_bind(struct udevice *dev)
+{
+	if (IS_ENABLED(CONFIG_RESET_BFLB)) {
+		device_bind(dev, DM_DRIVER_REF(bflb_reset), "reset",
+			    dev_get_plat(dev), dev_ofnode(dev), NULL);
+	}
+
+	return 0;
+}
+
 static int bflb_clk_probe(struct udevice *dev)
 {
 	const struct bflb_clk_plat *plat = dev_get_plat(dev);
@@ -314,6 +326,7 @@ U_BOOT_DRIVER(bflb_clk) = {
 	.name		= "bflb_clk",
 	.id		= UCLASS_CLK,
 	.of_match	= bflb_clk_ids,
+	.bind		= bflb_clk_bind,
 	.probe		= bflb_clk_probe,
 	.of_to_plat	= bflb_clk_of_to_plat,
 	.plat_auto	= sizeof(struct bflb_clk_plat),
