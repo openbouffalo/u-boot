@@ -386,7 +386,6 @@ struct rproc {
 /**
  * struct dm_rproc_uclass_pdata - platform data for a CPU
  * @name: Platform-specific way of naming the Remote proc
- * @driver_plat_data: driver specific platform data that may be needed.
  *
  * This can be accessed with dev_get_uclass_plat() for any UCLASS_REMOTEPROC
  * device.
@@ -394,7 +393,6 @@ struct rproc {
  */
 struct dm_rproc_uclass_pdata {
 	const char *name;
-	void *driver_plat_data;
 };
 
 /**
