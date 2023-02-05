@@ -297,8 +297,6 @@ static int ethoc_init_ring(struct ethoc *priv)
 		if (i == priv->num_rx - 1)
 			bd.stat |= RX_BD_WRAP;
 
-		flush_dcache_range((ulong)net_rx_packets[i],
-				   (ulong)net_rx_packets[i] + PKTSIZE_ALIGN);
 		ethoc_write_bd(priv, priv->num_tx + i, &bd);
 	}
 
@@ -415,6 +413,9 @@ static int ethoc_rx_common(struct ethoc *priv, uchar **packetp)
 			*packetp = priv->packet + entry * PKTSIZE_ALIGN;
 		else
 			*packetp = net_rx_packets[i];
+		invalidate_dcache_range((ulong)*packetp,
+					(ulong)*packetp + size);
+
 		return size;
 	} else {
 		return 0;
@@ -530,9 +531,6 @@ static int ethoc_free_pkt_common(struct ethoc *priv)
 		src = priv->packet + entry * PKTSIZE_ALIGN;
 	else
 		src = net_rx_packets[i];
-	/* clear the buffer descriptor so it can be reused */
-	flush_dcache_range((ulong)src,
-			   (ulong)src + PKTSIZE_ALIGN);
 	bd.stat &= ~RX_BD_STATS;
 	bd.stat |= RX_BD_EMPTY;
 	ethoc_write_bd(priv, entry, &bd);
