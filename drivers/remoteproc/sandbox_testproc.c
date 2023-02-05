@@ -349,7 +349,6 @@ U_BOOT_DRIVER(sandbox_testproc) = {
 /* TODO(nm@ti.com): Remove this along with non-DT support */
 static struct dm_rproc_uclass_pdata proc_3_test = {
 	.name = "proc_3_legacy",
-	.mem_type = RPROC_INTERNAL_MEMORY_MAPPED,
 };
 
 U_BOOT_DRVINFO(proc_3_demo) = {
