@@ -345,13 +345,3 @@ U_BOOT_DRIVER(sandbox_testproc) = {
 	.probe = sandbox_testproc_probe,
 	.priv_auto	= sizeof(struct sandbox_test_devdata),
 };
-
-/* TODO(nm@ti.com): Remove this along with non-DT support */
-static struct dm_rproc_uclass_pdata proc_3_test = {
-	.name = "proc_3_legacy",
-};
-
-U_BOOT_DRVINFO(proc_3_demo) = {
-	.name = "sandbox_test_proc",
-	.plat = &proc_3_test,
-};
