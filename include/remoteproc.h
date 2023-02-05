@@ -383,7 +383,6 @@ struct rproc {
 	u32 trace_len;
 };
 
-extern struct rproc *rproc_cfg_arr[2];
 /**
  * enum rproc_mem_type - What type of memory model does the rproc use
  * @RPROC_INTERNAL_MEMORY_MAPPED: Remote processor uses own memory and is memory
