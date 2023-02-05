@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0+
+
+config THEAD_C906
+	bool
+
+config THEAD_E906
+	bool
