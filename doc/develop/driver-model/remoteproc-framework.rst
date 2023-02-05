@@ -121,7 +121,6 @@ a simplified definition of a device is as follows:
 
 	struct dm_rproc_uclass_pdata proc_3_test = {
 		.name = "proc_3_legacy",
-		.mem_type = RPROC_INTERNAL_MEMORY_MAPPED,
 		.driver_plat_data = &mydriver_data;
 	};
 
