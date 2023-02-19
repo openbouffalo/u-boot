@@ -6,6 +6,7 @@
 #include <clk/bflb.h>
 #include <dm/device-internal.h>
 #include <dm/lists.h>
+#include <linux/delay.h>
 
 extern U_BOOT_DRIVER(bflb_reset);
 
@@ -248,8 +249,24 @@ static int bflb_clk_set_gate(struct clk *clk, bool enable)
 	return 0;
 }
 
+static int bflb_pll_toggle_reset(struct clk *clk)
+{
+	const struct bflb_clk_plat *plat = dev_get_plat(clk->dev);
+	const struct bflb_clk_data *data = bflb_clk_get_data(plat, clk);
+
+	setbits_le32(plat->base + data->rst_reg, data->rst_mask);
+	udelay(2);
+	clrbits_le32(plat->base + data->rst_reg, data->rst_mask);
+	udelay(2);
+	setbits_le32(plat->base + data->rst_reg, data->rst_mask);
+
+	return 0;
+}
+
 static int bflb_clk_enable(struct clk *clk)
 {
+	const struct bflb_clk_plat *plat = dev_get_plat(clk->dev);
+	const struct bflb_clk_data *data = bflb_clk_get_data(plat, clk);
 	struct clk *parent;
 	int ret;
 
@@ -260,7 +277,14 @@ static int bflb_clk_enable(struct clk *clk)
 			return ret;
 	}
 
-	return bflb_clk_set_gate(clk, true);
+	ret = bflb_clk_set_gate(clk, true);
+	if (ret)
+		return ret;
+
+	if (data->rst_reg && data->rst_mask)
+		bflb_pll_toggle_reset(clk);
+
+	return 0;
 }
 
 static int bflb_clk_disable(struct clk *clk)

@@ -16,9 +16,11 @@ struct bflb_clk_data {
 	u32		sel_mask;
 	u32		div_mask;
 	u32		en_mask;
+	u32		rst_mask;
 	u16		sel_reg;
 	u16		div_reg;
 	u16		en_reg;
+	u16		rst_reg;
 	u16 		fixed_div;
 };
 
