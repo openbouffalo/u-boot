@@ -31,7 +31,7 @@
 struct fotg210_udc;
 
 struct fotg210_ep {
-	struct usb_ep ep;
+	struct usb_ep usb_ep;
 
 	uint maxpacket;
 	uint id;
@@ -485,10 +485,10 @@ static void fotg210_recv(struct fotg210_udc *udc, int ep_id)
 
 	req = list_first_entry(&ep->queue, struct fotg210_request, queue);
 	len = fotg210_dma(ep, req);
-	if (len < ep->ep.maxpacket || req->req.length <= req->req.actual) {
+	if (len < ep->usb_ep.maxpacket || req->req.length <= req->req.actual) {
 		list_del_init(&req->queue);
 		if (req->req.complete)
-			req->req.complete(&ep->ep, &req->req);
+			req->req.complete(&ep->usb_ep, &req->req);
 	}
 
 	if (ep->id > 0 && list_empty(&ep->queue)) {
@@ -503,7 +503,7 @@ static void fotg210_recv(struct fotg210_udc *udc, int ep_id)
 static int fotg210_ep_enable(
 	struct usb_ep *_ep, const struct usb_endpoint_descriptor *desc)
 {
-	struct fotg210_ep *ep = container_of(_ep, struct fotg210_ep, ep);
+	struct fotg210_ep *ep = container_of(_ep, struct fotg210_ep, usb_ep);
 	struct fotg210_udc *udc = ep->udc;
 	struct fotg210_regs *regs = udc->regs;
 	int id = ep_to_fifo(udc, ep->id);
@@ -547,7 +547,7 @@ static int fotg210_ep_enable(
 
 static int fotg210_ep_disable(struct usb_ep *_ep)
 {
-	struct fotg210_ep *ep = container_of(_ep, struct fotg210_ep, ep);
+	struct fotg210_ep *ep = container_of(_ep, struct fotg210_ep, usb_ep);
 	struct fotg210_udc *udc = ep->udc;
 	struct fotg210_regs *regs = udc->regs;
 	int id = ep_to_fifo(udc, ep->id);
@@ -585,7 +585,7 @@ static void fotg210_ep_free_request(
 static int fotg210_ep_queue(
 	struct usb_ep *_ep, struct usb_request *_req, gfp_t gfp_flags)
 {
-	struct fotg210_ep *ep = container_of(_ep, struct fotg210_ep, ep);
+	struct fotg210_ep *ep = container_of(_ep, struct fotg210_ep, usb_ep);
 	struct fotg210_udc *udc = ep->udc;
 	struct fotg210_regs *regs = udc->regs;
 	struct fotg210_request *req;
@@ -608,14 +608,14 @@ static int fotg210_ep_queue(
 	if (req->req.length == 0) {
 		req->req.status = 0;
 		if (req->req.complete)
-			req->req.complete(&ep->ep, &req->req);
+			req->req.complete(&ep->usb_ep, &req->req);
 		return 0;
 	}
 
 	if (ep->id == 0) {
 		do {
 			int len = fotg210_dma(ep, req);
-			if (len < ep->ep.maxpacket)
+			if (len < ep->usb_ep.maxpacket)
 				break;
 			if (ep->desc->bEndpointAddress & USB_DIR_IN)
 				udelay(100);
@@ -624,7 +624,7 @@ static int fotg210_ep_queue(
 		if (ep->desc->bEndpointAddress & USB_DIR_IN) {
 			do {
 				int len = fotg210_dma(ep, req);
-				if (len < ep->ep.maxpacket)
+				if (len < ep->usb_ep.maxpacket)
 					break;
 			} while (req->req.length > req->req.actual);
 		} else {
@@ -636,7 +636,7 @@ static int fotg210_ep_queue(
 
 	if (ep->id == 0 || (ep->desc->bEndpointAddress & USB_DIR_IN)) {
 		if (req->req.complete)
-			req->req.complete(&ep->ep, &req->req);
+			req->req.complete(&ep->usb_ep, &req->req);
 	}
 
 	return 0;
@@ -644,7 +644,7 @@ static int fotg210_ep_queue(
 
 static int fotg210_ep_dequeue(struct usb_ep *_ep, struct usb_request *_req)
 {
-	struct fotg210_ep *ep = container_of(_ep, struct fotg210_ep, ep);
+	struct fotg210_ep *ep = container_of(_ep, struct fotg210_ep, usb_ep);
 	struct fotg210_request *req;
 
 	/* make sure it's actually queued on this endpoint */
@@ -670,7 +670,7 @@ static int fotg210_ep_dequeue(struct usb_ep *_ep, struct usb_request *_req)
 
 static int fotg210_ep_halt(struct usb_ep *_ep, int halt)
 {
-	struct fotg210_ep *ep = container_of(_ep, struct fotg210_ep, ep);
+	struct fotg210_ep *ep = container_of(_ep, struct fotg210_ep, usb_ep);
 	struct fotg210_udc *udc = ep->udc;
 	struct fotg210_regs *regs = udc->regs;
 	int ret = -1;
@@ -925,14 +925,14 @@ int usb_gadget_register_driver(struct usb_gadget_driver *driver)
 	for (i = 0; i < CFG_NUM_ENDPOINTS + 1; ++i) {
 		struct fotg210_ep *ep = udc->ep + i;
 
-		ep->ep.maxpacket = ep->maxpacket;
+		ep->usb_ep.maxpacket = ep->maxpacket;
 		INIT_LIST_HEAD(&ep->queue);
 
 		if (ep->id == 0) {
 			ep->stopped = 0;
 		} else {
 			ep->stopped = 1;
-			list_add_tail(&ep->ep.ep_list, &udc->gadget.ep_list);
+			list_add_tail(&ep->usb_ep.ep_list, &udc->gadget.ep_list);
 		}
 	}
 
