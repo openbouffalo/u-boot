@@ -63,6 +63,34 @@ struct fotg210_regs {
 	uint32_t dma_ctrl; /* 0x1c8: DMA Control Register */
 	uint32_t dma_addr; /* 0x1cc: DMA Address Register */
 	uint32_t ep0_data; /* 0x1d0: EP0 Setup Packet PIO Register */
+#ifdef USB_GADGET_FOTG210_VDMA
+	uint32_t DMA_CPS4; /*(0x1D4)*/
+	uint32_t DEV_FMAP2; /*(0x1D8)*/
+	uint32_t DEV_FCFG2; /*(0x1DC)*/
+	uint32_t DEV_FMAP3; /*(0x1E0)*/
+	uint32_t DEV_FCFG3; /*(0x1E4)*/
+	uint32_t DEV_FMAP4; /*(0x1E8)*/
+	uint32_t DEV_FCFG4; /*(0x1EC)*/
+	uint32_t DEV_FIBC4; /*(0x1F0)*/
+	uint32_t DEV_FIBC5; /*(0x1F4)*/
+	uint32_t DEV_FIBC6; /*(0x1F8)*/
+	uint32_t DEV_FIBC7; /*(0x1FC)*/
+	uint32_t rsvd9[64];
+	uint32_t vdma_cx_ctrl; /*(0x300)*/
+	uint32_t vdma_cx_addr; /*(0x304)*/
+	struct {
+		uint32_t ctrl;
+		uint32_t addr;
+	} vdma_fx[4]; /*(0x308)*/
+	uint32_t DEV_ISG3;  /*(0x328)*/
+	uint32_t DEV_MISG3; /*(0x32C)*/
+	uint32_t VDMA_CTRL; /*(0x330)*/
+	uint32_t LPM_CAP; /*(0x334)*/
+	uint32_t DEV_ISG4; /*(0x338)*/
+	uint32_t DEV_MISG4; /*(0x33C)*/
+	uint32_t VDMA_FNPS1; /*(0x350)*/
+	uint32_t VDMA_FNPS2; /*(0x354)*/
+#endif //USB_GADGET_FOTG210_VDMA
 };
 
 /* Miscellaneous Register */
@@ -358,5 +386,86 @@ struct fotg210_regs {
 #define DMACTRL_FIFO2MEM    (0 << 1) /* FIFO to Memory */
 #define DMACTRL_MEM2FIFO    (1 << 1) /* Memory to FIFO */
 #define DMACTRL_START       (1 << 0) /* DMA start */
+
+/* 0x1D4 : DMA_CPS4 */
+/* 0x1D8 : DEV_FMAP2 */
+/* 0x1DC : DEV_FCFG2 */
+/* 0x1E0 : DEV_FMAP3 */
+/* 0x1E4 : DEV_FCFG3 */
+/* 0x1E8 : DEV_FMAP4 */
+/* 0x1EC : DEV_FCFG4 */
+/* 0x1F0 : DEV_FIBC4 */
+/* 0x1F4 : DEV_FIBC5 */
+/* 0x1F8 : DEV_FIBC6 */
+/* 0x1FC : DEV_FIBC7 */
+
+/* 0x300 : vdma_cx_ctrl */
+#define VDMA_START_CXF     (1 << 0U)
+#define VDMA_TYPE_CXF      (1 << 1U)
+#define VDMA_IO_CXF        (1 << 2U)
+#define VDMA_LEN_CXF_SHIFT (8U)
+#define VDMA_LEN_CXF_MASK  (0x1ffff << USB_VDMA_LEN_CXF_SHIFT)
+
+/* 0x304 : vdma_cx_addr */
+#define VDMA_MADDR_CXF_SHIFT (8U)
+#define VDMA_MADDR_CXF_MASK  (0x1ffff << USB_VDMA_MADDR_CXF_SHIFT)
+
+/* 0x308 : vdma_fx.ctrl */
+#define VDMA_START_F0     (1 << 0U)
+#define VDMA_TYPE_F0      (1 << 1U)
+#define VDMA_IO_F0        (1 << 2U)
+#define VDMA_LEN_F0_SHIFT (8U)
+#define VDMA_LEN_F0_MASK  (0x1ffff << USB_VDMA_LEN_F0_SHIFT)
+
+/* 0x30c : vdma_fx.addr  */
+#define VDMA_MADDR_F0_SHIFT (8U)
+#define VDMA_MADDR_F0_MASK  (0x1ffff << USB_VDMA_MADDR_F0_SHIFT)
+
+/* 0x310 : VDMA_F1PS1 */
+/* 0x314 : VDMA_F1PS2 */
+/* 0x318 : VDMA_F2PS1 */
+/* 0x31C : VDMA_F2PS2 */
+/* 0x320 : VDMA_F3PS1 */
+/* 0x324 : VDMA_F3PS2 */
+
+/* 0x328 : DEV_ISG3 */
+#define VDMA_CMPLT_CXF (1 << 0U)
+#define VDMA_CMPLT_F0  (1 << 1U)
+#define VDMA_CMPLT_F1  (1 << 2U)
+#define VDMA_CMPLT_F2  (1 << 3U)
+#define VDMA_CMPLT_F3  (1 << 4U)
+#define VDMA_ERROR_CXF (1 << 16U)
+#define VDMA_ERROR_F0  (1 << 17U)
+#define VDMA_ERROR_F1  (1 << 18U)
+#define VDMA_ERROR_F2  (1 << 19U)
+#define VDMA_ERROR_F3  (1 << 20U)
+
+/* 0x32C : DEV_MISG3 */
+#define GIMR3_MASK 0x1F001F
+#define MVDMA_CMPLT_CXF (1 << 0U)
+#define MVDMA_CMPLT_F0  (1 << 1U)
+#define MVDMA_CMPLT_F1  (1 << 2U)
+#define MVDMA_CMPLT_F2  (1 << 3U)
+#define MVDMA_CMPLT_F3  (1 << 4U)
+#define MVDMA_ERROR_CXF (1 << 16U)
+#define MVDMA_ERROR_F0  (1 << 17U)
+#define MVDMA_ERROR_F1  (1 << 18U)
+#define MVDMA_ERROR_F2  (1 << 19U)
+#define MVDMA_ERROR_F3  (1 << 20U)
+
+/* 0x330 : VDMA_CTRL */
+#define VDMA_EN (1 << 0U)
+
+/* 0x334 : LPM_CAP */
+#define LPM_WAKEUP_EN (1 << 0U)
+
+/* 0x338 : DEV_ISG4 */
+#define L1_INT (1 << 0U)
+
+/* 0x33C : DEV_MISG4 */
+#define ML1_INT (1 << 0U)
+
+/* 0x350 : VDMA_FnPS1 */
+/* 0x354 : VDMA_FnPS2 */
 
 #endif
