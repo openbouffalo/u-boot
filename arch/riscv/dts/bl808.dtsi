@@ -1,0 +1,351 @@
+// SPDX-License-Identifier: GPL-2.0+
+
+#include <dt-bindings/clock/bl808-glb.h>
+#include <dt-bindings/clock/bl808-hbn.h>
+#include <dt-bindings/clock/bl808-mm-glb.h>
+#include <dt-bindings/clock/bl808-pds.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/reset/bl808-mm-glb.h>
+
+/dts-v1/;
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	ext_xtal: clk-ext-xtal {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+	};
+
+	mcu_peri: bus@20000000 {
+		compatible = "simple-bus";
+		ranges;
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		glb: syscon@20000000 {
+			compatible = "bflb,bl808-glb", "simple-mfd";
+			reg = <0x20000000 0x1000>;
+			ranges;
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			mcu_irq: interrupt-controller@20000000 {
+				compatible = "bflb,bl808-mcu-irq";
+				reg = <0x20000050 0x18>;
+				interrupt-controller;
+				#interrupt-cells = <2>;
+			};
+
+			glb_clk: clock-controller@20000000 {
+				compatible = "bflb,bl808-glb-clk";
+				reg = <0x20000000 0x1000>;
+				clocks = <&hbn_clk CLK_XCLK>,
+					 <&hbn_clk CLK_HBN_ROOT>,
+					 <&hbn_clk CLK_HBN_UART>;
+				clock-names = "xclk",
+					      "hbn_root",
+					      "hbn_uart";
+				#clock-cells = <1>;
+				#reset-cells = <1>;
+			};
+
+			sysreset: sysreset@20000000 {
+				compatible = "bflb,bl808-glb-sysreset";
+				reg = <0x20000000 0x1000>;
+			};
+
+			gpio: gpio@20000000 {
+				compatible = "bflb,bl808-gpio";
+				reg = <0x20000000 0x1000>;
+				interrupts = <SOC_PERIPHERAL_IRQ(44) IRQ_TYPE_EDGE_RISING>;
+				gpio-controller;
+				interrupt-controller;
+				#gpio-cells = <2>;
+				#interrupt-cells = <2>;
+
+				emac_pins: emac-pins {
+					pins = "GPIO24", "GPIO25", "GPIO26",
+					       "GPIO27", "GPIO28", "GPIO29",
+					       "GPIO30", "GPIO31", "GPIO32",
+					       "GPIO33";
+					function = "emac";
+				};
+
+				sdh_pins: sdh-pins {
+					pins = "GPIO0", "GPIO1", "GPIO2",
+					       "GPIO3", "GPIO4", "GPIO5";
+					function = "sdh";
+				};
+			};
+		};
+
+		gpip: gpip@20002000 {
+			compatible = "bflb,bl808-gpip";
+			reg = <0x20002000 0x400>;
+			#io-channel-cells = <1>;
+		};
+
+		cci: clock-controller@20008000 {
+			compatible = "bflb,bl808-cci";
+			reg = <0x20008000 0x1000>;
+			clocks = <&pds_clk CLK_RC32M>,
+				 <&hbn_clk CLK_XTAL>;
+			clock-names = "rc32m",
+				      "xtal";
+			#clock-cells = <1>;
+		};
+
+		uart0: serial@2000a000 {
+			compatible = "bflb,bl808-uart";
+			reg = <0x2000a000 0x100>;
+			interrupts = <SOC_PERIPHERAL_IRQ(28) IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&glb_clk CLK_UART>;
+			status = "disabled";
+		};
+
+		uart1: serial@2000a100 {
+			compatible = "bflb,bl808-uart";
+			reg = <0x2000a100 0x100>;
+			interrupts = <SOC_PERIPHERAL_IRQ(29) IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&glb_clk CLK_UART>;
+			status = "disabled";
+		};
+
+		spi0: spi@2000a200 {
+			compatible = "bflb,bl808-spi";
+			reg = <0x2000a200 0x100>;
+			interrupts = <SOC_PERIPHERAL_IRQ(27) IRQ_TYPE_EDGE_RISING>;
+		};
+
+		i2c0: i2c@2000a300 {
+			compatible = "bflb,bl808-i2c";
+			reg = <0x2000a300 0x100>;
+			interrupts = <SOC_PERIPHERAL_IRQ(32) IRQ_TYPE_EDGE_RISING>;
+		};
+
+		pwm: pwm@2000a400 {
+			compatible = "bflb,bl808-pwm";
+			reg = <0x2000a400 0x100>;
+		};
+
+		timer0: timer@2000a500 {
+			compatible = "bflb,bl808-timer";
+			reg = <0x2000a500 0x100>;
+			interrupts = <SOC_PERIPHERAL_IRQ(36) IRQ_TYPE_EDGE_RISING>,
+				     <SOC_PERIPHERAL_IRQ(37) IRQ_TYPE_EDGE_RISING>,
+				     <SOC_PERIPHERAL_IRQ(38) IRQ_TYPE_EDGE_RISING>;
+			interrupt-names = "ch0", "ch1", "wdt";
+		};
+
+		ir: ir@2000a600 {
+			compatible = "bflb,bl808-ir";
+			reg = <0x2000a600 0x100>;
+		};
+
+		i2c1: i2c@2000a900 {
+			compatible = "bflb,bl808-i2c";
+			reg = <0x2000a900 0x100>;
+			interrupts = <SOC_PERIPHERAL_IRQ(39) IRQ_TYPE_EDGE_RISING>;
+		};
+
+		uart2: serial@2000aa00 {
+			compatible = "bflb,bl808-uart";
+			reg = <0x2000aa00 0x100>;
+			interrupts = <SOC_PERIPHERAL_IRQ(30) IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&glb_clk CLK_UART>;
+			status = "disabled";
+		};
+
+		i2s: i2s@2000ab00 {
+			compatible = "bflb,bl808-i2s";
+			reg = <0x2000ab00 0x100>;
+			interrupts = <SOC_PERIPHERAL_IRQ(40) IRQ_TYPE_EDGE_RISING>;
+		};
+
+		dma0: dma@2000c000 {
+			compatible = "bflb,bl808-dma";
+			reg = <0x2000c000 0x1000>;
+			interrupts = <SOC_PERIPHERAL_IRQ(15) IRQ_TYPE_EDGE_RISING>;
+		};
+
+		pds: syscon@2000e000 {
+			compatible = "bflb,bl808-pds", "simple-mfd";
+			reg = <0x2000e000 0x1000>;
+			ranges;
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			pds_clk: clock-controller@2000e000 {
+				compatible = "bflb,bl808-pds-clk";
+				reg = <0x2000e000 0x1000>;
+				clocks = <&glb_clk CLK_TOP_AUPLL_DIV1>,
+					 <&glb_clk CLK_TOP_CPUPLL_400M>,
+					 <&glb_clk CLK_TOP_WIFIPLL_240M>,
+					 <&glb_clk CLK_TOP_WIFIPLL_320M>;
+				clock-names = "aupll_div1",
+					      "cpupll_400m",
+					      "wifipll_240m",
+					      "wifipll_320m";
+				#clock-cells = <1>;
+				#reset-cells = <1>;
+			};
+
+			usb_phy: phy@2000e500 {
+				compatible = "bflb,bl808-usb-phy";
+				reg = <0x2000e500 0x8>;
+				#phy-cells = <0>;
+			};
+		};
+
+		hbn: syscon@2000f000 {
+			compatible = "bflb,bl808-hbn", "simple-mfd";
+			reg = <0x2000f000 0x1000>;
+			ranges;
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			hbn_clk: clock-controller@2000f000 {
+				compatible = "bflb,bl808-hbn-clk";
+				reg = <0x2000f000 0x1000>;
+				clocks = <&pds_clk CLK_RC32M>,
+					 <&pds_clk CLK_PDS_PLL>,
+					 <&glb_clk CLK_BCLK>,
+					 <&glb_clk CLK_DIG_32K>,
+					 <&glb_clk CLK_TOP_MUXPLL_160M>,
+					 <&ext_xtal>;
+				clock-names = "rc32m",
+					      "pds_pll",
+					      "bclk",
+					      "dig_32k",
+					      "muxpll_160m",
+					      "ext_xtal";
+				#clock-cells = <1>;
+			};
+		};
+
+		audio: audio@20055000 {
+			compatible = "bflb,bl808-audio";
+			reg = <0x20055000 0x1000>;
+			interrupts = <SOC_PERIPHERAL_IRQ(4) IRQ_TYPE_EDGE_RISING>;
+		};
+
+		efuse: efuse@20056000 {
+			compatible = "bflb,bl808-efuse";
+			reg = <0x20056000 0x1000>;
+			interrupts = <SOC_PERIPHERAL_IRQ(26) IRQ_TYPE_EDGE_RISING>;
+		};
+
+		sdh: mmc@20060000 {
+			compatible = "bflb,bl808-sdhci";
+			reg = <0x20060000 0x1000>;
+			interrupts = <SOC_PERIPHERAL_IRQ(17) IRQ_TYPE_EDGE_RISING>;
+			clocks = <&glb_clk CLK_BUS_SDH>,
+				 <&glb_clk CLK_SDH>;
+			clock-names = "bus", "mod";
+			pinctrl-0 = <&sdh_pins>;
+			pinctrl-names = "default";
+		};
+
+		emac: emac@20070000 {
+			compatible = "bflb,bl808-emac";
+			reg = <0x20070000 0x1000>;
+			interrupts = <SOC_PERIPHERAL_IRQ(24) IRQ_TYPE_EDGE_RISING>;
+			clocks = <&glb_clk CLK_BUS_EMAC>;
+			clock-names = "bus";
+			pinctrl-0 = <&emac_pins>;
+			pinctrl-names = "default";
+		};
+
+		dma1: dma@20071000 {
+			compatible = "bflb,bl808-dma";
+			reg = <0x20071000 0x1000>;
+			interrupts = <SOC_PERIPHERAL_IRQ(16) IRQ_TYPE_EDGE_RISING>;
+		};
+
+		usb: usb@20072000 {
+			compatible = "bflb,bl808-usb";
+			reg = <0x20072000 0x1000>;
+			interrupts = <SOC_PERIPHERAL_IRQ(21) IRQ_TYPE_EDGE_RISING>;
+			clocks = <&glb_clk CLK_BUS_USB>;
+			clock-names = "bus";
+			phys = <&usb_phy>;
+			phy-names = "phy";
+		};
+	};
+
+	mm_peri: bus@30000000 {
+		compatible = "simple-bus";
+		ranges;
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		mm_misc: syscon@30000000 {
+			compatible = "bflb,bl808-mm-misc";
+			reg = <0x30000000 0x1000>;
+			clocks = <&mm_glb_clk CLK_MM_CPU>;
+			resets = <&mm_glb_clk RST_MM_CPU>;
+			interrupt-controller;
+			#interrupt-cells = <2>;
+		};
+
+		dma2: dma@30001000 {
+			compatible = "bflb,bl808-dma";
+			reg = <0x30001000 0x1000>;
+		};
+
+		uart3: serial@30002000 {
+			compatible = "bflb,bl808-uart";
+			reg = <0x30002000 0x1000>;
+			clocks = <&mm_glb_clk CLK_MM_UART0>;
+			status = "disabled";
+		};
+
+		i2c2: i2c@30003000 {
+			compatible = "bflb,bl808-i2c";
+			reg = <0x30003000 0x1000>;
+		};
+
+		i2c3: i2c@30004000 {
+			compatible = "bflb,bl808-i2c";
+			reg = <0x30004000 0x1000>;
+		};
+
+		mm_glb_clk: clock-controller@30007000 {
+			compatible = "bflb,bl808-mm-glb-clk";
+			reg = <0x30007000 0x1000>;
+			clocks = <&pds_clk CLK_RC32M>,
+				 <&hbn_clk CLK_XTAL>,
+				 <&glb_clk CLK_TOP_CPUPLL_400M>,
+				 <&glb_clk CLK_DSPPLL>,
+				 <&glb_clk CLK_MM_MUXPLL_160M>,
+				 <&glb_clk CLK_MM_MUXPLL_240M>,
+				 <&glb_clk CLK_MM_MUXPLL_320M>;
+			clock-names = "rc32m",
+				      "xtal",
+				      "cpupll_400m",
+				      "dsppll",
+				      "muxpll_160m",
+				      "muxpll_240m",
+				      "muxpll_320m";
+			#clock-cells = <1>;
+			#reset-cells = <1>;
+		};
+
+		spi1: spi@30008000 {
+			compatible = "bflb,bl808-spi";
+			reg = <0x30008000 0x1000>;
+		};
+
+		timer1: timer@30009000 {
+			compatible = "bflb,bl808-timer";
+			reg = <0x30009000 0x1000>;
+		};
+
+		psram_uhs: memory-controller@3000f000 {
+			compatible = "bflb,bl808-psram-uhs";
+			reg = <0x3000f000 0x1000>;
+		};
+	};
+};
