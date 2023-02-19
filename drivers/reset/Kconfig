@@ -63,6 +63,13 @@ config RESET_BCM6345
 	help
 	  Support reset controller on BCM6345.
 
+config RESET_BFLB
+	bool "Reset controller driver for Bouffalo Lab SoCs"
+	depends on DM_RESET && CLK_BFLB
+	default y
+	help
+	  This enables reset controller support for Bouffalo Lab SoCs.
+
 config RESET_UNIPHIER
 	bool "Reset controller driver for UniPhier SoCs"
 	depends on ARCH_UNIPHIER
