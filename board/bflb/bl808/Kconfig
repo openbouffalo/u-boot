@@ -26,7 +26,8 @@ config SYS_CPU
 	default "thead"
 
 config SYS_LOAD_ADDR
-	default 0x50100000
+	default 0x50100000 if BL808_CPU_D0
+	default 0x51000000 if BL808_CPU_M0
 
 config SYS_VENDOR
 	default "bflb"

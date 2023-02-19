@@ -48,4 +48,11 @@
 	BOOTENV
 #endif
 
+#ifdef CONFIG_BL808_CPU_M0
+#define CFG_EXTRA_ENV_SETTINGS \
+	"bootcmd=run start_d0\0" \
+	"start_d0=sf probe; sf read $loadaddr 100000 100000; " \
+	"rproc init 0; rproc load 0 $loadaddr 100000; rproc start 0\0"
+#endif
+
 #endif /* __CONFIG_H */
