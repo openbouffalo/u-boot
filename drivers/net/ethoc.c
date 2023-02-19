@@ -62,6 +62,7 @@
 #define	MODER_HUGE	(1 << 14)	/* huge packets enable */
 #define	MODER_PAD	(1 << 15)	/* padding enabled */
 #define	MODER_RSM	(1 << 16)	/* receive small packets */
+#define	MODER_RMII	(1 << 17)
 
 /* interrupt source and mask registers */
 #define	INT_MASK_TXF	(1 << 0)	/* transmit frame */
@@ -130,6 +131,7 @@
 #define	TX_BD_RETRY_MASK	(0x00f0)
 #define	TX_BD_RETRY(x)		(((x) & 0x00f0) >>  4)
 #define	TX_BD_UR		(1 <<  8)	/* transmitter underrun */
+#define	TX_BD_EOF		(1 << 10)
 #define	TX_BD_CRC		(1 << 11)	/* TX CRC enable */
 #define	TX_BD_PAD		(1 << 12)	/* pad enable */
 #define	TX_BD_WRAP		(1 << 13)
@@ -295,8 +297,6 @@ static int ethoc_init_ring(struct ethoc *priv)
 		if (i == priv->num_rx - 1)
 			bd.stat |= RX_BD_WRAP;
 
-		flush_dcache_range((ulong)net_rx_packets[i],
-				   (ulong)net_rx_packets[i] + PKTSIZE_ALIGN);
 		ethoc_write_bd(priv, priv->num_tx + i, &bd);
 	}
 
@@ -315,7 +315,7 @@ static int ethoc_reset(struct ethoc *priv)
 
 	/* enable FCS generation and automatic padding */
 	mode = ethoc_read(priv, MODER);
-	mode |= MODER_CRC | MODER_PAD;
+	mode |= MODER_CRC | MODER_PAD | MODER_RMII;
 	ethoc_write(priv, MODER, mode);
 
 	/* set full-duplex mode */
@@ -413,6 +413,9 @@ static int ethoc_rx_common(struct ethoc *priv, uchar **packetp)
 			*packetp = priv->packet + entry * PKTSIZE_ALIGN;
 		else
 			*packetp = net_rx_packets[i];
+		invalidate_dcache_range((ulong)*packetp,
+					(ulong)*packetp + size);
+
 		return size;
 	} else {
 		return 0;
@@ -485,8 +488,8 @@ static int ethoc_send_common(struct ethoc *priv, void *packet, int length)
 		bd.addr = virt_to_phys(packet);
 	}
 	flush_dcache_range((ulong)packet, (ulong)packet + length);
-	bd.stat &= ~(TX_BD_STATS | TX_BD_LEN_MASK);
-	bd.stat |= TX_BD_LEN(length);
+	bd.stat &= ~(TX_BD_STATS | TX_BD_EOF | TX_BD_LEN_MASK);
+	bd.stat |= TX_BD_LEN(length) | TX_BD_EOF;
 	ethoc_write_bd(priv, entry, &bd);
 
 	/* start transmit */
@@ -528,9 +531,6 @@ static int ethoc_free_pkt_common(struct ethoc *priv)
 		src = priv->packet + entry * PKTSIZE_ALIGN;
 	else
 		src = net_rx_packets[i];
-	/* clear the buffer descriptor so it can be reused */
-	flush_dcache_range((ulong)src,
-			   (ulong)src + PKTSIZE_ALIGN);
 	bd.stat &= ~RX_BD_STATS;
 	bd.stat |= RX_BD_EMPTY;
 	ethoc_write_bd(priv, entry, &bd);
@@ -736,6 +736,7 @@ static const struct eth_ops ethoc_ops = {
 };
 
 static const struct udevice_id ethoc_ids[] = {
+	{ .compatible = "bflb,bl808-emac" },
 	{ .compatible = "opencores,ethoc" },
 	{ }
 };
