@@ -164,6 +164,13 @@
 			interrupts = <SOC_PERIPHERAL_IRQ(40) IRQ_TYPE_EDGE_RISING>;
 		};
 
+		sflash: spi@2000b000 {
+			compatible = "bflb,bl808-sflash";
+			reg = <0x2000b000 0x1000>;
+			interrupts = <SOC_PERIPHERAL_IRQ(13) IRQ_TYPE_EDGE_RISING>,
+				     <SOC_PERIPHERAL_IRQ(14) IRQ_TYPE_EDGE_RISING>;
+		};
+
 		dma0: dma@2000c000 {
 			compatible = "bflb,bl808-dma";
 			reg = <0x2000c000 0x1000>;
