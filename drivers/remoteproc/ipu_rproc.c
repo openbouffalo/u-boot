@@ -145,6 +145,8 @@ unsigned long mem_count;
 unsigned int pgtable_l2_map[MAX_NUM_L2_PAGE_TABLES];
 unsigned int pgtable_l2_cnt;
 
+static struct rproc *rproc_cfg_arr[2];
+
 void *ipu_alloc_mem(struct udevice *dev, unsigned long len, unsigned long align)
 {
 	unsigned long mask;
@@ -597,7 +599,7 @@ struct rproc ipu2_config = {
 	.intmem_to_l3_mapping = &ipu2_intmem_to_l3_mapping
 };
 
-struct rproc *rproc_cfg_arr[2] = {
+static struct rproc *rproc_cfg_arr[2] = {
 	[IPU2] = &ipu2_config,
 	[IPU1] = &ipu1_config,
 };

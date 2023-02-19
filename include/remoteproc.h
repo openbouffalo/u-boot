@@ -383,25 +383,9 @@ struct rproc {
 	u32 trace_len;
 };
 
-extern struct rproc *rproc_cfg_arr[2];
-/**
- * enum rproc_mem_type - What type of memory model does the rproc use
- * @RPROC_INTERNAL_MEMORY_MAPPED: Remote processor uses own memory and is memory
- *	mapped to the host processor over an address range.
- *
- * Please note that this is an enumeration of memory model of different types
- * of remote processors. Few of the remote processors do have own internal
- * memories, while others use external memory for instruction and data.
- */
-enum rproc_mem_type {
-	RPROC_INTERNAL_MEMORY_MAPPED	= 0,
-};
-
 /**
  * struct dm_rproc_uclass_pdata - platform data for a CPU
  * @name: Platform-specific way of naming the Remote proc
- * @mem_type: one of 'enum rproc_mem_type'
- * @driver_plat_data: driver specific platform data that may be needed.
  *
  * This can be accessed with dev_get_uclass_plat() for any UCLASS_REMOTEPROC
  * device.
@@ -409,8 +393,6 @@ enum rproc_mem_type {
  */
 struct dm_rproc_uclass_pdata {
 	const char *name;
-	enum rproc_mem_type mem_type;
-	void *driver_plat_data;
 };
 
 /**
