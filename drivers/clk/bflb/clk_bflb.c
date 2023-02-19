@@ -292,6 +292,65 @@ static int bflb_clk_disable(struct clk *clk)
 	return bflb_clk_set_gate(clk, false);
 }
 
+static void bflb_clk_dump(struct udevice *dev)
+{
+	const struct bflb_clk_plat *plat = dev_get_plat(dev);
+	const struct bflb_clk_desc *desc = plat->desc;
+	struct clk clk, *parent;
+
+	printf("   %s (%s)\n", dev->name, dev_read_string(dev, "compatible"));
+	printf("ID       NAME            PARENT         RATE    SEL DIV EN\n");
+	printf("--+----------------+----------------+----------+---+---+--\n");
+
+	clk.dev = dev;
+	for (size_t id = 0; id < desc->num_clks; ++id) {
+		const struct bflb_clk_data *data = &desc->clks[id];
+		const char *parent_name;
+
+		clk.id = id;
+		parent = clk_get_parent(&clk);
+
+		if (IS_ERR(parent))
+			parent_name = "(none)";
+		else if (parent->dev->driver != dev->driver)
+			parent_name = parent->dev->name;
+		else {
+			const struct bflb_clk_plat *parent_plat;
+			const struct bflb_clk_data *parent_data;
+
+			parent_plat = dev_get_plat(parent->dev);
+			parent_data = bflb_clk_get_data(parent_plat, parent);
+			parent_name = parent_data->name;
+			if (!parent_name)
+				parent_name = "(null)";
+		}
+
+		printf("%2zd %16s %16s %10ld",
+		       id, data->name, parent_name, clk_get_rate(&clk));
+		if (data->sel_mask)
+			printf(" %3d",
+			       (readl(plat->base + data->sel_reg) &
+				data->sel_mask) /
+			       (data->sel_mask & -data->sel_mask));
+		else if (data->div_mask || data->en_mask)
+			puts("    ");
+		if (data->div_mask)
+			printf(" %3d",
+			       (readl(plat->base + data->div_reg) &
+				data->div_mask) /
+			       (data->div_mask & -data->div_mask));
+		else if (data->en_mask)
+			puts("    ");
+		if (data->en_mask)
+			printf(" %2d",
+			       (readl(plat->base + data->en_reg) &
+				data->en_mask) /
+			       (data->en_mask & -data->en_mask));
+		puts("\n");
+	}
+	puts("\n");
+}
+
 static struct clk_ops bflb_clk_ops = {
 	.request	= bflb_clk_request,
 	.round_rate	= bflb_clk_round_rate,
@@ -301,6 +360,7 @@ static struct clk_ops bflb_clk_ops = {
 	.set_parent	= bflb_clk_set_parent,
 	.enable		= bflb_clk_enable,
 	.disable	= bflb_clk_disable,
+	.dump		= bflb_clk_dump,
 };
 
 static int bflb_clk_bind(struct udevice *dev)

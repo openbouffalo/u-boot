@@ -26,6 +26,7 @@ struct ofnode_phandle_args;
  * @set_parent: Set current clock parent
  * @enable: Enable a clock.
  * @disable: Disable a clock.
+ * @dump: Dump information about clocks to the console.
  *
  * The individual methods are described more fully below.
  */
@@ -41,6 +42,7 @@ struct clk_ops {
 	int (*set_parent)(struct clk *clk, struct clk *parent);
 	int (*enable)(struct clk *clk);
 	int (*disable)(struct clk *clk);
+	void (*dump)(struct udevice *dev);
 };
 
 #if 0 /* For documentation only */
