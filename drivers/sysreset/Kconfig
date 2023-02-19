@@ -66,6 +66,13 @@ config POWEROFF_GPIO
 	  Support for system poweroff using a GPIO pin. This can be used
 	  for systems having a single GPIO to trigger a system poweroff.
 
+config SYSRESET_BFLB
+	bool "Enable support for Bouffalo Lab SoC system reset"
+	depends on TARGET_BFLB_BL808
+	default y
+	help
+	  This enables system reset driver support for the BL808 SoC.
+
 config SYSRESET_GPIO
 	bool "Enable support for GPIO reset driver"
 	select DM_GPIO
