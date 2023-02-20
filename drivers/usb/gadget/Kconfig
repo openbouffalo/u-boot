@@ -132,6 +132,20 @@ config USB_GADGET_MAX3420
 	help
 	  MAX3420, from MAXIM, implements USB-over-SPI Full-Speed device controller.
 
+config USB_GADGET_FOTG210
+	bool "Faraday FOTG210 USB Peripheral Controller"
+	help
+	   Faraday USB2.0 OTG controller which can be configured as
+	   high speed or full speed USB device. This driver supppors
+	   Bulk Transfer so far.
+
+config USB_GADGET_FOTG210_VDMA
+	bool "Enable VDMA support"
+	depends on USB_GADGET_FOTG210
+	help
+	   Faraday usb device controller work on VDMA.
+	   This featrue supports after v1.20.0.
+
 config USB_GADGET_VBUS_DRAW
 	int "Maximum VBUS Power usage (2-500 mA)"
 	range 2 500

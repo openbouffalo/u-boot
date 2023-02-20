@@ -102,6 +102,12 @@ config BCM_SR_PCIE_PHY
 	  Enable this to support the Broadcom Stingray PCIe PHY
 	  If unsure, say N.
 
+config BL808_USB_PHY
+	bool "Bouffalo Lab BL808 USB PHY driver"
+	depends on PHY && TARGET_BFLB_BL808
+	help
+	  Support the Bouffalo Lab BL808 USB PHY.
+
 config PHY_DA8XX_USB
 	tristate "TI DA8xx USB PHY Driver"
 	depends on PHY && ARCH_DAVINCI
