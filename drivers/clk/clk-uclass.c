@@ -471,7 +471,6 @@ void clk_free(struct clk *clk)
 ulong clk_get_rate(struct clk *clk)
 {
 	const struct clk_ops *ops;
-	int ret;
 
 	debug("%s(clk=%p)\n", __func__, clk);
 	if (!clk_valid(clk))
@@ -481,35 +480,36 @@ ulong clk_get_rate(struct clk *clk)
 	if (!ops->get_rate)
 		return -ENOSYS;
 
-	ret = ops->get_rate(clk);
-	if (ret)
-		return log_ret(ret);
-
-	return 0;
+	return ops->get_rate(clk);
 }
 
 struct clk *clk_get_parent(struct clk *clk)
 {
+	const struct clk_ops *ops;
 	struct udevice *pdev;
 	struct clk *pclk;
 
 	debug("%s(clk=%p)\n", __func__, clk);
 	if (!clk_valid(clk))
-		return NULL;
+		return ERR_PTR(-ENODEV);
 
-	pdev = dev_get_parent(clk->dev);
-	if (!pdev)
-		return ERR_PTR(-ENODEV);
-	pclk = dev_get_clk_ptr(pdev);
-	if (!pclk)
-		return ERR_PTR(-ENODEV);
+	ops = clk_dev_ops(clk->dev);
+	if (ops->get_parent) {
+		pclk = ops->get_parent(clk);
+	} else {
+		pdev = dev_get_parent(clk->dev);
+		if (!pdev)
+			return ERR_PTR(-ENODEV);
+		pclk = dev_get_clk_ptr(pdev);
+		if (!pclk)
+			return ERR_PTR(-ENODEV);
+	}
 
 	return pclk;
 }
 
 ulong clk_get_parent_rate(struct clk *clk)
 {
-	const struct clk_ops *ops;
 	struct clk *pclk;
 
 	debug("%s(clk=%p)\n", __func__, clk);
@@ -520,12 +520,9 @@ ulong clk_get_parent_rate(struct clk *clk)
 	if (IS_ERR(pclk))
 		return -ENODEV;
 
-	ops = clk_dev_ops(pclk->dev);
-	if (!ops->get_rate)
-		return -ENOSYS;
-
 	/* Read the 'rate' if not already set or if proper flag set*/
-	if (!pclk->rate || pclk->flags & CLK_GET_RATE_NOCACHE)
+	if (!pclk->rate || IS_ERR_VALUE(pclk->rate) ||
+	    pclk->flags & CLK_GET_RATE_NOCACHE)
 		pclk->rate = clk_get_rate(pclk);
 
 	return pclk->rate;

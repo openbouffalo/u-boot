@@ -671,7 +671,7 @@ static inline bool clk_dev_binded(struct clk *clk)
  */
 static inline bool clk_valid(struct clk *clk)
 {
-	return clk && !!clk->dev;
+	return clk && !IS_ERR(clk) && !!clk->dev;
 }
 
 int soc_clk_dump(void);
