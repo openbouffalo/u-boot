@@ -159,6 +159,7 @@ static inline unsigned long find_first_bit(const unsigned long *addr, unsigned l
 	     (bit) < (size);					\
 	     (bit) = find_next_bit((addr), (size), (bit) + 1))
 
+#if 0
 static inline unsigned long
 bitmap_find_next_zero_area(unsigned long *map,
 			   unsigned long size,
@@ -184,6 +185,7 @@ again:
 	}
 	return index;
 }
+#endif
 
 static inline void bitmap_fill(unsigned long *dst, unsigned int nbits)
 {
