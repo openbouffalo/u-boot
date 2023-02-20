@@ -1,0 +1,30 @@
+/ {
+	memory {
+		device_type = "memory";
+		reg = <0x50000000 0x4000000>;
+	};
+};
+
+&glb_clk {
+	u-boot,dm-pre-reloc;
+};
+
+&gpio {
+	u-boot,dm-pre-reloc;
+};
+
+&hbn_clk {
+	u-boot,dm-pre-reloc;
+};
+
+&mm_glb_clk {
+	u-boot,dm-pre-reloc;
+};
+
+&pds_clk {
+	u-boot,dm-pre-reloc;
+};
+
+&uart3_pins {
+	u-boot,dm-pre-reloc;
+};

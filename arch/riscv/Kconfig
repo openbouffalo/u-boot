@@ -11,6 +11,9 @@ choice
 config TARGET_AE350
 	bool "Support ae350"
 
+config TARGET_BFLB_BL808
+	bool "Support Boards based on Bouffalo Lab BL808"
+
 config TARGET_MICROCHIP_ICICLE
 	bool "Support Microchip PolarFire-SoC Icicle Board"
 
@@ -59,6 +62,7 @@ config SPL_SYS_DCACHE_OFF
 
 # board-specific options below
 source "board/AndesTech/ae350/Kconfig"
+source "board/bflb/bl808/Kconfig"
 source "board/emulation/qemu-riscv/Kconfig"
 source "board/microchip/mpfs_icicle/Kconfig"
 source "board/sifive/unleashed/Kconfig"
