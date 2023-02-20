@@ -20,7 +20,6 @@ static int print_remoteproc_list(void)
 	struct udevice *dev;
 	struct uclass *uc;
 	int ret;
-	char *type;
 
 	ret = uclass_get(UCLASS_REMOTEPROC, &uc);
 	if (ret) {
@@ -38,18 +37,9 @@ static int print_remoteproc_list(void)
 		if (!(dev_get_flags(dev) & DM_FLAG_ACTIVATED))
 			continue;
 
-		switch (uc_pdata->mem_type) {
-		case RPROC_INTERNAL_MEMORY_MAPPED:
-			type = "internal memory mapped";
-			break;
-		default:
-			type = "unknown";
-			break;
-		}
-		printf("%d - Name:'%s' type:'%s' supports: %s%s%s%s%s%s\n",
+		printf("%d - Name:'%s' supports: %s%s%s%s%s%s\n",
 		       dev_seq(dev),
 		       uc_pdata->name,
-		       type,
 		       ops->load ? "load " : "",
 		       ops->start ? "start " : "",
 		       ops->stop ? "stop " : "",

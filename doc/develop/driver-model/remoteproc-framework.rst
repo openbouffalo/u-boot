@@ -106,36 +106,6 @@ provide a load and start function. We assume here that the device
 needs to be loaded and started, else, there is no real purpose of
 using the remoteproc framework.
 
-Describing the device using platform data
------------------------------------------
-
-*IMPORTANT* NOTE: THIS SUPPORT IS NOT MEANT FOR USE WITH NEWER PLATFORM
-SUPPORT. THIS IS ONLY FOR LEGACY DEVICES. THIS MODE OF INITIALIZATION
-*WILL* BE EVENTUALLY REMOVED ONCE ALL NECESSARY PLATFORMS HAVE MOVED
-TO DM/FDT.
-
-Considering that many platforms are yet to move to device-tree model,
-a simplified definition of a device is as follows:
-
-.. code-block:: c
-
-	struct dm_rproc_uclass_pdata proc_3_test = {
-		.name = "proc_3_legacy",
-		.mem_type = RPROC_INTERNAL_MEMORY_MAPPED,
-		.driver_plat_data = &mydriver_data;
-	};
-
-	U_BOOT_DRVINFO(proc_3_demo) = {
-		.name = "sandbox_test_proc",
-		.plat = &proc_3_test,
-	};
-
-There can be additional data that may be desired depending on the
-remoteproc driver specific needs (for example: SoC integration
-details such as clock handle or something similar). See appropriate
-documentation for specific remoteproc driver for further details.
-These are passed via driver_plat_data.
-
 Describing the device using device tree
 ---------------------------------------
 

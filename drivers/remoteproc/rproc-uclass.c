@@ -131,31 +131,8 @@ static int rproc_pre_probe(struct udevice *dev)
 
 	/* See if we need to populate via fdt */
 
-	if (!dev_get_plat(dev)) {
-#if CONFIG_IS_ENABLED(OF_CONTROL)
-		bool tmp;
-		debug("'%s': using fdt\n", dev->name);
+	if (dev_has_ofnode(dev))
 		uc_pdata->name = dev_read_string(dev, "remoteproc-name");
-
-		/* Default is internal memory mapped */
-		uc_pdata->mem_type = RPROC_INTERNAL_MEMORY_MAPPED;
-		tmp = dev_read_bool(dev, "remoteproc-internal-memory-mapped");
-		if (tmp)
-			uc_pdata->mem_type = RPROC_INTERNAL_MEMORY_MAPPED;
-#else
-		/* Nothing much we can do about this, can we? */
-		return -EINVAL;
-#endif
-
-	} else {
-		struct dm_rproc_uclass_pdata *pdata = dev_get_plat(dev);
-
-		debug("'%s': using legacy data\n", dev->name);
-		if (pdata->name)
-			uc_pdata->name = pdata->name;
-		uc_pdata->mem_type = pdata->mem_type;
-		uc_pdata->driver_plat_data = pdata->driver_plat_data;
-	}
 
 	/* Else try using device Name */
 	if (!uc_pdata->name)
