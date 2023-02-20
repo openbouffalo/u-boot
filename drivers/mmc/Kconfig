@@ -553,6 +553,17 @@ config MMC_SDHCI_BCMSTB
 
 	  If unsure, say N.
 
+config MMC_SDHCI_BFLB
+	tristate "SDHCI support for the Bouffalo Lab SDH controller"
+	depends on MMC_SDHCI && TARGET_BFLB_BL808
+	help
+	  This selects the Bouffalo Lab SDH controller.
+
+	  If you have a Bouffalo Lab platform with SD or MMC devices,
+	  say Y here.
+
+	  If unsure, say N.
+
 config MMC_SDHCI_CADENCE
 	bool "SDHCI support for the Cadence SD/SDIO/eMMC controller"
 	depends on BLK && DM_MMC
