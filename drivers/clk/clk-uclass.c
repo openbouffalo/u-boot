@@ -740,6 +740,30 @@ int clk_disable_bulk(struct clk_bulk *bulk)
 	return 0;
 }
 
+int soc_clk_dump(void)
+{
+	const struct clk_ops *ops;
+	struct udevice *dev;
+	struct uclass *uc;
+	int ret;
+
+	ret = uclass_get(UCLASS_CLK, &uc);
+	if (ret)
+		return ret;
+
+	uclass_foreach_dev(dev, uc) {
+		ret = device_probe(dev);
+		if (ret)
+			continue;
+
+		ops = clk_dev_ops(dev);
+		if (ops->dump)
+			ops->dump(dev);
+	}
+
+	return 0;
+}
+
 int clk_get_by_id(ulong id, struct clk **clkp)
 {
 	struct udevice *dev;
