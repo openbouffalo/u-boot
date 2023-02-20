@@ -19,6 +19,7 @@ obj-$(CONFIG_AR933X_UART) += serial_ar933x.o
 obj-$(CONFIG_ARM_DCC) += arm_dcc.o
 obj-$(CONFIG_ATMEL_USART) += atmel_usart.o
 obj-$(CONFIG_BCM6345_SERIAL) += serial_bcm6345.o
+obj-$(CONFIG_BFLB_SERIAL) += serial_bflb.o
 obj-$(CONFIG_COREBOOT_SERIAL) += serial_coreboot.o
 obj-$(CONFIG_CORTINA_UART) += serial_cortina.o
 obj-$(CONFIG_DEBUG_SBI_CONSOLE) += serial_sbi.o
